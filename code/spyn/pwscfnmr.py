@@ -127,6 +127,7 @@ class qe(Dirs, get_dir):
             cnt=0 #contador da barra de progresso
             self.defreeze() #carrega função para nao congelar a tela
             while pidof != '': #contador que testa o pidof, pra saber qnd o calculo vai acabar (o pidof some quando o calculo acaba
+                time.sleep(1)   #aguarda 1 segundo entre verificações para não sobrecarregar a CPU
                 cnt += 1
                 if cnt > 100: #condição pro contador ficar resetando, pois assim a barra de progresso tbm reseta
                     cnt = 0
@@ -229,6 +230,7 @@ class qe(Dirs, get_dir):
                 cnt = 0
                 self.defreeze()
                 while pidof != '':
+                    time.sleep(1)   #aguarda 1 segundo entre verificações para não sobrecarregar a CPU
                     cnt += 1
                     if cnt > 100:
                         cnt = 0
@@ -259,6 +261,7 @@ class qe(Dirs, get_dir):
                 cnt = 0
                 self.defreeze()
                 while pidof != '':
+                    time.sleep(1)   #aguarda 1 segundo entre verificações para não sobrecarregar a CPU
                     cnt += 1
                     if cnt > 100:
                         cnt = 0
