@@ -201,7 +201,6 @@ class qe(Dirs, get_dir):
                                "      diagonalization = '{}'\n"
                                "      verbosity = 'high'\n"
                                "      q_gipaw = 0.01\n"
-                               "      spline_ps = .true.\n"
                                "      use_nmr_macroscopic_shape = .true.\n"
                                "/\n"
                                " ".format(prefix, self.tmp_dir, diag_gipaw)) #montando o input

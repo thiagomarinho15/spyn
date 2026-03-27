@@ -425,7 +425,6 @@ if (SG==2) {
 
  print "                     ecutwfc = CUTOFF"
  print "                       nosym = cboxnosym"
- print "                   spline_ps = .true."
  print " /"
  print " &ELECTRONS"
  print "                    conv_thr = pyaccuracyscf"

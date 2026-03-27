@@ -37,7 +37,7 @@ docs/figures/workflow_comparison.pdf
 .claude/
 
 # Runtime installation artifacts (diretorio gerado pelo instalador)
-spyn/
+/spyn/
 
 # Arquivos temporarios do SPYN/QE
 code/spyn/tmp/
