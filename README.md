@@ -51,22 +51,26 @@ python3 install_ui.py
   ├─ [pre-GUI]  sudo apt-get install python3-pip python3-dev python3-pyqt5
   │
   └─ PyQt5 dialog opens
-       ├── QLineEdit  — destination directory path
-       ├── QPushButton "..."  — opens QFileDialog directory browser
-       └── QPushButton "Install"  — triggers Stage 2
+       ├── QLineEdit       — destination directory path (with placeholder text)
+       ├── QPushButton "Procurar..."  — opens QFileDialog directory browser
+       ├── QProgressBar    — indeterminate spinner during installation
+       ├── QTextEdit       — live installation log (dark-themed monospace)
+       └── QPushButton "Instalar"  — triggers Stage 2
 ```
 
 This bootstrapping strategy means `install_ui.py` can be run on a completely bare Python 3 system: it installs its own GUI dependency before attempting to import it.
 
-#### Stage 2 — Full environment build (triggered by clicking Install)
+#### Stage 2 — Full environment build (triggered by clicking Instalar)
+
+The installation runs in a background thread so the interface stays responsive. A live log displays each step as it executes.
 
 ```
-User clicks Install
+User clicks Instalar
   │
   ├─ 1. Extract spyn.tar.gz  ──────────────────────────────────────────────────────
   │       tar -xzvf spyn.tar.gz -C <chosen_directory>
-  │       Unpacks the complete SPYN source tree, QE 6.3 sources, GIPAW sources,
-  │       pseudopotentials, and auxiliary scripts.
+  │       Unpacks the SPYN source tree, pseudopotentials, and auxiliary scripts.
+  │       (QE sources are downloaded during installation — not bundled.)
   │
   ├─ 2. Write runtime path configuration  ─────────────────────────────────────────
   │       Creates spyndir.py inside the installation directory.
@@ -87,22 +91,24 @@ User clicks Install
   │         │
   │         ├─ dependency.sh
   │         │     sudo apt-get install:
-  │         │       gawk  gfortran  openmpi-bin  openmpi-doc  libopenmpi-dev
+  │         │       gawk  gfortran  wget
+  │         │       liblapack-dev  libblas-dev  libscalapack-mpi-dev
+  │         │       openmpi-bin  libopenmpi-dev
   │         │       xterm  openbabel  jmol  python3-dev  python3-pip
   │         │     pip3 install:
   │         │       PyQt5  matplotlib  pandas  scipy  numpy
   │         │
-  │         ├─ Quantum ESPRESSO 6.3 compilation
-  │         │     tar -xzf qe-6.3.tar.gz
-  │         │     ./configure --enable-parallel --enable-shared
+  │         ├─ Quantum ESPRESSO 7.4.1
+  │         │     wget qe-7.4.1.tar.gz  (downloaded from GitHub)
+  │         │     ./configure --disable-parallel
+  │         │         FFLAGS/F90FLAGS="-O2 -fallow-argument-mismatch"
   │         │     make -j$(nproc) pw          ← uses all available CPU cores
   │         │     Produces:  bin/pw.x
   │         │
-  │         ├─ GIPAW module compilation
-  │         │     cd qe-gipaw-6.3
-  │         │     ./configure --with-qe-source=../qe-6.3
-  │         │     make -j$(nproc)             ← uses all available CPU cores
-  │         │     Produces:  bin/gipaw.x
+  │         ├─ GIPAW 7.3.1
+  │         │     wget qe-gipaw-7.3.1.tar.gz  (downloaded from GitHub)
+  │         │     ./configure --with-qe-source=<qe-7.4.1 path>
+  │         │     make                        ← produces bin/gipaw.x
   │         │
   │         └─ simbolic.sh  —  system-wide executable links
   │               sudo cp bin/pw.x    /usr/bin/pw
@@ -115,6 +121,7 @@ User clicks Install
             Exec=<install_dir>/spyn/spyn.sh
             Icon=<install_dir>/spyn/fig/spyn.png
             Type=Application
+            Categories=Science;Education;
 
           Runs permissionDE.sh:
             sudo chmod a+xrw spyn.desktop
@@ -130,18 +137,20 @@ User clicks Install
 | Phase | Automated action | Manual equivalent |
 |-------|-----------------|-------------------|
 | Pre-GUI bootstrap | Install `xterm`, `python3-pyqt5` via `apt` | `sudo apt install ...` |
-| Archive extraction | Extract full SPYN + QE source tree | `tar -xzvf ...` |
+| Archive extraction | Extract SPYN source tree + assets | `tar -xzvf ...` |
 | Path configuration | Generate `spyndir.py` with installation path | Edit source file manually |
-| System packages | Install 10 system dependencies via `apt-get` | Multiple `sudo apt install` calls |
+| System packages | Install 13 system dependencies via `apt-get` | Multiple `sudo apt install` calls |
 | Python packages | Install 5 Python packages via `pip3` | `pip3 install ...` |
-| QE compilation | Configure + compile `pw.x` (MPI + shared libs) | ~20 min expert procedure |
-| GIPAW compilation | Configure + compile `gipaw.x` against QE source | ~10 min expert procedure |
+| QE 7.4.1 download | `wget` source from GitHub | Manual download |
+| QE compilation | Configure + compile `pw.x` | ~20–40 min expert procedure |
+| GIPAW 7.3.1 download | `wget` source from GitHub | Manual download |
+| GIPAW compilation | Configure + compile `gipaw.x` against QE 7.4.1 | ~5–10 min expert procedure |
 | System links | `/usr/bin/pw`, `/usr/bin/gipaw` | `sudo cp` + verify `$PATH` |
 | Desktop integration | `.desktop` entry + icon in system menu | Manual XDG entry creation |
 
-**Total user actions required: 6** (run command, open dialog, select directory, click Install, enter root password once, launch SPYN from menu).
+**Total user actions required: 6** (run command, open dialog, select directory, click Instalar, enter root password once, launch SPYN from menu).
 
-**Total automated actions: 9 phases, covering ≥ 20 individual commands** that would otherwise be executed and verified manually.
+**Total automated actions: 11 phases, covering ≥ 25 individual commands** that would otherwise be executed and verified manually.
 
 ### System requirements
 
@@ -151,10 +160,11 @@ User clicks Install
 | PyQt5 | ≥ 5.12 | GUI framework (installed automatically) |
 | NumPy / SciPy / Pandas / Matplotlib | see `requirements.txt` | Installed automatically |
 | OpenBabel | ≥ 3.0 | Installed automatically (`obabel`, `obenergy`) |
-| Quantum ESPRESSO + GIPAW | 6.3 | Compiled and linked automatically |
+| Quantum ESPRESSO | 7.4.1 | Downloaded and compiled automatically |
+| GIPAW | 7.3.1 | Downloaded and compiled automatically |
 | xterm | any | Installed automatically; terminal for QE subprocess |
 | Jmol | any | Installed automatically; optional 3D molecular viewer |
-| OS | Linux (Debian/Ubuntu/Mint) | Tested: Debian 10/11, Ubuntu 18–22, Mint 19–20, Elementary OS 5 |
+| OS | Linux (Debian/Ubuntu/Mint) | Tested: Ubuntu 22–24, Debian 11/12, Mint 21+ |
 
 ### Manual installation (non-Debian systems)
 

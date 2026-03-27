@@ -36,6 +36,13 @@ docs/figures/workflow_comparison.pdf
 # Local development tools
 .claude/
 
+# Runtime installation artifacts (diretorio gerado pelo instalador)
+spyn/
+
+# Arquivos temporarios do SPYN/QE
+code/spyn/tmp/
+code/spyn/input_tmp.in
+
 # OS
 .DS_Store
 Thumbs.db
