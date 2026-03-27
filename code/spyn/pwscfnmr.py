@@ -120,17 +120,21 @@ class qe(Dirs, get_dir):
             fpwin.close() #quando roda direto o pwout
             self.apy_ui.progbar_qe.setVisible(True) #Mostrar a barra de progresso do qe na janela
             print("[SPYN] Iniciando PWscf com {} processos MPI...".format(nproc))
+            pw_stdin  = open('{}pwin.in'.format(self.tmp_dir),  'r')
+            pw_stdout = open('{}pwout.out'.format(self.tmp_dir), 'w')
             proc_pw = subprocess.Popen(
-                "mpirun -np {} pw <{}pwin.in >{}pwout.out".format(nproc, self.tmp_dir, self.tmp_dir),
-                shell=True) #rodar o calculo e guardar referencia ao processo
+                ['mpirun', '-np', str(nproc), 'pw'],
+                stdin=pw_stdin, stdout=pw_stdout, stderr=pw_stdout)
 
             cnt=0 #contador da barra de progresso
             self.defreeze() #carrega função para nao congelar a tela
             while proc_pw.poll() is None: #poll() retorna None enquanto o processo está rodando
-                time.sleep(0.2)  #aguarda entre verificações
+                time.sleep(0.2)
                 cnt = (cnt + 1) % 101
                 self.apy_ui.progbar_qe.setValue(cnt)    #seta o valor do contador na barra de progresso
                 self.defreeze() #emite o sinal para descongelar a tela
+            pw_stdin.close()
+            pw_stdout.close()
             print("[SPYN] PWscf finalizado (código de saída: {})".format(proc_pw.returncode))
 
 
@@ -217,9 +221,11 @@ class qe(Dirs, get_dir):
 
                 self.apy_ui.progbar_qe.setVisible(True) #ativando progbar
                 print("[SPYN] Iniciando GIPAW com {} processos MPI...".format(nproc))
+                gipaw_stdin  = open('{}gipawin.in'.format(self.tmp_dir),  'r')
+                gipaw_stdout = open('{}gipawout.out'.format(self.tmp_dir), 'w')
                 proc_gipaw = subprocess.Popen(
-                    'mpirun -np {} gipaw <{}gipawin.in >{}gipawout.out'.format(nproc, self.tmp_dir, self.tmp_dir),
-                    shell=True)  # rodando o gipaw
+                    ['mpirun', '-np', str(nproc), 'gipaw'],
+                    stdin=gipaw_stdin, stdout=gipaw_stdout, stderr=gipaw_stdout)
                 cnt = 0
                 self.defreeze()
                 while proc_gipaw.poll() is None:
@@ -227,7 +233,8 @@ class qe(Dirs, get_dir):
                     cnt = (cnt + 1) % 101
                     self.apy_ui.progbar_qe.setValue(cnt)
                     self.defreeze()
-
+                gipaw_stdin.close()
+                gipaw_stdout.close()
                 print("[SPYN] GIPAW finalizado (código de saída: {})".format(proc_gipaw.returncode))
                 self.apy_ui.progbar_qe.setVisible(False)
                 f_gout = open('{}gipawout.out'.format(self.tmp_dir), 'r')
@@ -242,9 +249,11 @@ class qe(Dirs, get_dir):
 
                 self.apy_ui.progbar_qe.setVisible(True)
                 print("[SPYN] Iniciando GIPAW (caminho direto) com {} processos MPI...".format(nproc))
+                gipaw2_stdin  = open('{}gipawin.in'.format(self.tmp_dir),  'r')
+                gipaw2_stdout = open('{}gipawout.out'.format(self.tmp_dir), 'w')
                 proc_gipaw2 = subprocess.Popen(
-                    'mpirun -np {} gipaw <{}gipawin.in >{}gipawout.out'.format(nproc, self.tmp_dir, self.tmp_dir),
-                    shell=True)  # rodando o gipaw
+                    ['mpirun', '-np', str(nproc), 'gipaw'],
+                    stdin=gipaw2_stdin, stdout=gipaw2_stdout, stderr=gipaw2_stdout)
                 cnt = 0
                 self.defreeze()
                 while proc_gipaw2.poll() is None:
@@ -252,7 +261,8 @@ class qe(Dirs, get_dir):
                     cnt = (cnt + 1) % 101
                     self.apy_ui.progbar_qe.setValue(cnt)
                     self.defreeze()
-
+                gipaw2_stdin.close()
+                gipaw2_stdout.close()
                 print("[SPYN] GIPAW finalizado (código de saída: {})".format(proc_gipaw2.returncode))
                 self.apy_ui.progbar_qe.setVisible(False)
                 f_gout = open('{}gipawout.out'.format(self.tmp_dir), 'r')
