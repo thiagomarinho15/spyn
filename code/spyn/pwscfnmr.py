@@ -119,26 +119,17 @@ class qe(Dirs, get_dir):
             fpwin = open('{}pwin.in'.format(self.tmp_dir), 'r') #só serve para nao aparecer a mensagem de erro de diretório na tela
             fpwin.close() #quando roda direto o pwout
             self.apy_ui.progbar_qe.setVisible(True) #Mostrar a barra de progresso do qe na janela
-            #print(fpwin.read())
-            subprocess.call("mpirun -np {} pw <{}pwin.in>{}pwout.out &".format(nproc, self.tmp_dir, self.tmp_dir), shell=True) #rodar o calculo
-            time.sleep(1) #tempo de esperar pra começar a rodar o calculo, pq assim da pra pegar o pid do pw
-            pidof = subprocess.getoutput('pidof pw') #pegando o pid do pw
+            proc_pw = subprocess.Popen(
+                "mpirun -np {} pw <{}pwin.in >{}pwout.out".format(nproc, self.tmp_dir, self.tmp_dir),
+                shell=True) #rodar o calculo e guardar referencia ao processo
 
             cnt=0 #contador da barra de progresso
             self.defreeze() #carrega função para nao congelar a tela
-            while pidof != '': #contador que testa o pidof, pra saber qnd o calculo vai acabar (o pidof some quando o calculo acaba
-                time.sleep(1)   #aguarda 1 segundo entre verificações para não sobrecarregar a CPU
-                cnt += 1
-                if cnt > 100: #condição pro contador ficar resetando, pois assim a barra de progresso tbm reseta
-                    cnt = 0
-                pidof = subprocess.getoutput('pidof pw')    #pega o pidof do pw a cada loop
+            while proc_pw.poll() is None: #poll() retorna None enquanto o processo está rodando
+                time.sleep(1)   #aguarda 1 segundo entre verificações
+                cnt = (cnt + 1) % 101
                 self.apy_ui.progbar_qe.setValue(cnt)    #seta o valor do contador na barra de progresso
-
-                if self.apy_ui.progbar_qe.value() == self.apy_ui.progbar_qe.maximum(): #testar se a barra de progresso atingiu o valor maximo
-                    self.apy_ui.progbar_qe.reset()
-                    self.apy_ui.progbar_qe.setValue(cnt)
                 self.defreeze() #emite o sinal para descongelar a tela
-                #subprocess.run('cp {}pwout.out {}pwgrep'.format(self.tmp_dir, self.tmp_dir), shell=True) #Modo interativo da mineração do pw, mas deixa o software pesado
 
 
             self.apy_ui.progbar_qe.setVisible(False) #qnd o calculo acabar, some com a barra de progresso
@@ -223,23 +214,15 @@ class qe(Dirs, get_dir):
                 fend.close()
 
                 self.apy_ui.progbar_qe.setVisible(True) #ativando progbar
-                subprocess.call('mpirun -np {} gipaw <{}gipawin.in>{}gipawout.out &'.format(nproc,self.tmp_dir, self.tmp_dir),
-                                shell=True)  # rodando o gipaw
-                time.sleep(1) #daqui pra baixo ja está explicado na função pwout
-                pidof = subprocess.getoutput('pidof gipaw')
+                proc_gipaw = subprocess.Popen(
+                    'mpirun -np {} gipaw <{}gipawin.in >{}gipawout.out'.format(nproc, self.tmp_dir, self.tmp_dir),
+                    shell=True)  # rodando o gipaw
                 cnt = 0
                 self.defreeze()
-                while pidof != '':
-                    time.sleep(1)   #aguarda 1 segundo entre verificações para não sobrecarregar a CPU
-                    cnt += 1
-                    if cnt > 100:
-                        cnt = 0
-                    pidof = subprocess.getoutput('pidof gipaw')
+                while proc_gipaw.poll() is None:
+                    time.sleep(1)
+                    cnt = (cnt + 1) % 101
                     self.apy_ui.progbar_qe.setValue(cnt)
-
-                    if self.apy_ui.progbar_qe.value() == self.apy_ui.progbar_qe.maximum():
-                        self.apy_ui.progbar_qe.reset()
-                        self.apy_ui.progbar_qe.setValue(cnt)
                     self.defreeze()
 
                 self.apy_ui.progbar_qe.setVisible(False)
@@ -254,23 +237,15 @@ class qe(Dirs, get_dir):
                 qe.pw_output(self) #Roda o pw output
 
                 self.apy_ui.progbar_qe.setVisible(True)
-                subprocess.call('mpirun -np {} gipaw <{}gipawin.in>{}gipawout.out &'.format(nproc,self.tmp_dir, self.tmp_dir),
-                                shell=True)  # rodando o gipaw
-                time.sleep(1)
-                pidof = subprocess.getoutput('pidof gipaw')
+                proc_gipaw2 = subprocess.Popen(
+                    'mpirun -np {} gipaw <{}gipawin.in >{}gipawout.out'.format(nproc, self.tmp_dir, self.tmp_dir),
+                    shell=True)  # rodando o gipaw
                 cnt = 0
                 self.defreeze()
-                while pidof != '':
-                    time.sleep(1)   #aguarda 1 segundo entre verificações para não sobrecarregar a CPU
-                    cnt += 1
-                    if cnt > 100:
-                        cnt = 0
-                    pidof = subprocess.getoutput('pidof gipaw')
+                while proc_gipaw2.poll() is None:
+                    time.sleep(1)
+                    cnt = (cnt + 1) % 101
                     self.apy_ui.progbar_qe.setValue(cnt)
-
-                    if self.apy_ui.progbar_qe.value() == self.apy_ui.progbar_qe.maximum():
-                        self.apy_ui.progbar_qe.reset()
-                        self.apy_ui.progbar_qe.setValue(cnt)
                     self.defreeze()
 
                 self.apy_ui.progbar_qe.setVisible(False)
