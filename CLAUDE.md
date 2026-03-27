@@ -72,7 +72,7 @@ Long-running tasks (`pw.x`, `gipaw.x`, `obabel`, `obenergy`) are launched via `Q
 `Spyn_2.0_alpha/install_ui.py` is the graphical installer. It:
 1. Bootstraps `xterm` + `python3-pyqt5` before showing the GUI
 2. Extracts `spyn.tar.gz` (4 MB — no QE sources bundled)
-3. Runs `install_spyn.py` inside an xterm which downloads and compiles QE 7.4.1 + GIPAW 7.3.1 from GitHub
+3. Runs `install_spyn.py` inside an xterm which downloads and compiles QE 7.3.1 + GIPAW 7.3.1 from GitHub
 
 The installer runs compilation in a background `QThread` so the log panel stays live. QE is compiled with `--disable-parallel` (serial build, simpler dependency tree). GIPAW uses the external module `qe-gipaw 7.3.1` via `--with-qe-source`.
 
@@ -84,4 +84,4 @@ If the download/compilation was interrupted, re-running `install_spyn.py` is saf
 - **Linux only** — targets Debian/Ubuntu/Mint; no Windows/macOS support
 - **GUI modules excluded from coverage** — only `spyn_core.py` and `__init__.py` are measured
 - **CI does not install PyQt5** — all imports in test files must be PyQt5-free
-- **QE version** — installer targets QE 7.4.1 + GIPAW 7.3.1 (requires internet access during install)
+- **QE version** — installer targets QE 7.3.1 + GIPAW 7.3.1 (requires internet access during install)

@@ -98,8 +98,8 @@ User clicks Instalar
   │         │     pip3 install:
   │         │       PyQt5  matplotlib  pandas  scipy  numpy
   │         │
-  │         ├─ Quantum ESPRESSO 7.4.1
-  │         │     wget qe-7.4.1.tar.gz  (downloaded from GitHub)
+  │         ├─ Quantum ESPRESSO 7.3.1
+  │         │     wget qe-7.3.1.tar.gz  (downloaded from GitHub)
   │         │     ./configure --disable-parallel
   │         │         FFLAGS/F90FLAGS="-O2 -fallow-argument-mismatch"
   │         │     make -j$(nproc) pw          ← uses all available CPU cores
@@ -107,7 +107,7 @@ User clicks Instalar
   │         │
   │         ├─ GIPAW 7.3.1
   │         │     wget qe-gipaw-7.3.1.tar.gz  (downloaded from GitHub)
-  │         │     ./configure --with-qe-source=<qe-7.4.1 path>
+  │         │     ./configure --with-qe-source=<qe-7.3.1 path>
   │         │     make                        ← produces bin/gipaw.x
   │         │
   │         └─ simbolic.sh  —  system-wide executable links
@@ -141,10 +141,10 @@ User clicks Instalar
 | Path configuration | Generate `spyndir.py` with installation path | Edit source file manually |
 | System packages | Install 13 system dependencies via `apt-get` | Multiple `sudo apt install` calls |
 | Python packages | Install 5 Python packages via `pip3` | `pip3 install ...` |
-| QE 7.4.1 download | `wget` source from GitHub | Manual download |
+| QE 7.3.1 download | `wget` source from GitHub | Manual download |
 | QE compilation | Configure + compile `pw.x` | ~20–40 min expert procedure |
 | GIPAW 7.3.1 download | `wget` source from GitHub | Manual download |
-| GIPAW compilation | Configure + compile `gipaw.x` against QE 7.4.1 | ~5–10 min expert procedure |
+| GIPAW compilation | Configure + compile `gipaw.x` against QE 7.3.1 | ~5–10 min expert procedure |
 | System links | `/usr/bin/pw`, `/usr/bin/gipaw` | `sudo cp` + verify `$PATH` |
 | Desktop integration | `.desktop` entry + icon in system menu | Manual XDG entry creation |
 
@@ -160,7 +160,7 @@ User clicks Instalar
 | PyQt5 | ≥ 5.12 | GUI framework (installed automatically) |
 | NumPy / SciPy / Pandas / Matplotlib | see `requirements.txt` | Installed automatically |
 | OpenBabel | ≥ 3.0 | Installed automatically (`obabel`, `obenergy`) |
-| Quantum ESPRESSO | 7.4.1 | Downloaded and compiled automatically |
+| Quantum ESPRESSO | 7.3.1 | Downloaded and compiled automatically |
 | GIPAW | 7.3.1 | Downloaded and compiled automatically |
 | xterm | any | Installed automatically; terminal for QE subprocess |
 | Jmol | any | Installed automatically; optional 3D molecular viewer |
