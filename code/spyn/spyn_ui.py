@@ -979,7 +979,7 @@ class Ui_spyn_mainwindow(object):
         self.cbox_filterscfout.setItemText(2, _translate("spyn_mainwindow", "Total energy"))
         self.label_32.setText(_translate("spyn_mainwindow", "       Threads:"))
         self.ln_ibrav.setText(_translate("spyn_mainwindow", "0"))
-        self.ln_cutoff.setText(_translate("spyn_mainwindow", "10"))
+        self.ln_cutoff.setText(_translate("spyn_mainwindow", "80"))
         self.label_16.setText(_translate("spyn_mainwindow", "       Calculate tensors:"))
         self.label_15.setText(_translate("spyn_mainwindow", "         Calculate PWscf:"))
         self.label_10.setText(_translate("spyn_mainwindow", "       Step scf:"))
