@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Spyn
+GenericName=Spyn
+Comment=GUI for NMR Crystallography
+Exec=/home/thiago/Documents/spyn/spyn.sh
+Terminal=false
+Type=Application
+Icon=/home/thiago/Documents/spyn/fig/spyn.png
+StartupNotify=false
+Categories=Science;Education;

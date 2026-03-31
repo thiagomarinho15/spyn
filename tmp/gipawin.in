@@ -1,0 +1,10 @@
+&inputgipaw
+      job = 'nmr'
+      prefix = 'alglycine'
+      tmp_dir = '/home/thiago/Documents/spyn/tmp/'
+      diagonalization = 'david'
+      verbosity = 'high'
+      q_gipaw = 0.01
+      use_nmr_macroscopic_shape = .true.
+/
+ 
