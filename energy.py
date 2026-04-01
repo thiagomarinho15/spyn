@@ -111,8 +111,8 @@ class energy(Dirs):
                 # print(indx,energy)
                 for v in confs_mins:
                     if energyy == v:
-                        get_conf_final.append('Confomero {} = {} kj/mol'.format((indx + 1), energyy))
-                        dict1['Confomero {}'.format(indx + 1)] = energyy
+                        get_conf_final.append('Conformer {} = {} kj/mol'.format((indx + 1), energyy))
+                        dict1['Conformer {}'.format(indx + 1)] = energyy
             return dict1
 
         except FileNotFoundError:

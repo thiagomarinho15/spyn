@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-SPYN Installer — interface grafica de instalacao
-Instala SPYN + Quantum ESPRESSO 7.4.1 + GIPAW 7.3.1 automaticamente.
+SPYN Installer — graphical installation interface
+Installs SPYN + Quantum ESPRESSO 7.3.1 + GIPAW 7.3.1 automatically.
 
-Uso:
+Usage:
     python3 install_ui.py
 """
 
@@ -46,21 +46,21 @@ class InstallThread(QThread):
             spyn_dir = os.path.join(self.install_dir, 'spyn')
             archive  = os.path.join(self.installer_dir, 'spyn.tar.gz')
 
-            # 1 — extrair arquivos
-            self.status.emit("Extraindo arquivos do SPYN...")
-            self.log.emit(f"→ Extraindo {archive} para {self.install_dir}/")
+            # 1 — extract files
+            self.status.emit("Extracting SPYN files...")
+            self.log.emit(f"→ Extracting {archive} to {self.install_dir}/")
             r = subprocess.run(
                 f"tar -xzvf '{archive}' -C '{self.install_dir}'",
                 shell=True, capture_output=True, text=True
             )
             if r.returncode != 0:
-                self.log.emit(f"[ERRO] {r.stderr}")
+                self.log.emit(f"[ERROR] {r.stderr}")
                 self.done.emit(False)
                 return
 
-            # 2 — gravar configuracao de caminho (spyndir.py)
-            self.status.emit("Configurando caminhos de instalacao...")
-            self.log.emit(f"→ Criando spyndir.py em {spyn_dir}/")
+            # 2 — write path configuration (spyndir.py)
+            self.status.emit("Configuring installation paths...")
+            self.log.emit(f"→ Creating spyndir.py in {spyn_dir}/")
             with open(os.path.join(spyn_dir, 'spyndir.py'), 'w') as f:
                 f.write(
                     "class Spyndir():\n"
@@ -68,25 +68,25 @@ class InstallThread(QThread):
                     f"       self.spyndir = '{spyn_dir}'\n"
                 )
 
-            # 3 — criar script de lancamento (spyn.sh)
+            # 3 — create launcher script (spyn.sh)
             launcher = os.path.join(spyn_dir, 'spyn.sh')
             with open(launcher, 'w') as f:
                 f.write(f"#!/bin/bash\ncd '{spyn_dir}' && python3 spyn_main.py\n")
 
-            # 4 — abrir terminal e compilar QE + GIPAW
-            self.status.emit("Compilando Quantum ESPRESSO 7.4.1 + GIPAW 7.3.1...")
-            self.log.emit("→ Abrindo terminal para compilacao (30–60 min)...")
-            self.log.emit("   Acompanhe o progresso na janela do terminal.")
+            # 4 — open terminal and compile QE + GIPAW
+            self.status.emit("Compiling Quantum ESPRESSO 7.3.1 + GIPAW 7.3.1...")
+            self.log.emit("→ Opening terminal for compilation (30–60 min)...")
+            self.log.emit("   Follow the progress in the terminal window.")
             subprocess.run(
-                f"xterm -title 'SPYN — Compilacao' -fa 'Monospace' -fs 10 "
+                f"xterm -title 'SPYN — Compilation' -fa 'Monospace' -fs 10 "
                 f"-e 'cd \"{spyn_dir}\" && python3 install_spyn.py; "
-                f"echo; echo Pressione ENTER para fechar.; read'",
+                f"echo; echo Press ENTER to close.; read'",
                 shell=True
             )
 
-            # 5 — entrada no menu de aplicativos
-            self.status.emit("Criando entrada no menu de aplicativos...")
-            self.log.emit("→ Criando spyn.desktop e permissoes...")
+            # 5 — application menu entry
+            self.status.emit("Creating application menu entry...")
+            self.log.emit("→ Creating spyn.desktop and permissions...")
             desktop_entry = (
                 "[Desktop Entry]\n"
                 "Name=Spyn\n"
@@ -112,16 +112,16 @@ class InstallThread(QThread):
                     f"sudo cp '{desktop_file}' /usr/share/applications/spyn.desktop\n"
                 )
             subprocess.run(
-                f"xterm -title 'SPYN — Permissoes' -e "
+                f"xterm -title 'SPYN — Permissions' -e "
                 f"'sh \"{perm_script}\" && exit; bash'",
                 shell=True
             )
 
-            self.log.emit("→ Instalacao concluida com sucesso!")
+            self.log.emit("→ Installation completed successfully!")
             self.done.emit(True)
 
         except Exception as exc:
-            self.log.emit(f"[ERRO INESPERADO] {exc}")
+            self.log.emit(f"[UNEXPECTED ERROR] {exc}")
             self.done.emit(False)
 
 
@@ -148,7 +148,7 @@ class InstallerWindow(QDialog):
         # --- Cabecalho ---
         title = QLabel("SPYN")
         title.setStyleSheet("font-size: 22px; font-weight: bold; color: #1a1a2e;")
-        subtitle = QLabel("NMR Crystallography Software — Instalador v2.0.0")
+        subtitle = QLabel("NMR Crystallography Software — Installer v2.0.0")
         subtitle.setStyleSheet("font-size: 13px; color: #555;")
         root.addWidget(title)
         root.addWidget(subtitle)
@@ -160,12 +160,12 @@ class InstallerWindow(QDialog):
 
         # --- Informacoes ---
         info = QLabel(
-            "Este instalador configurara automaticamente:\n"
-            "  • Dependencias do sistema (via apt)\n"
-            "  • Quantum ESPRESSO 7.4.1  (compilacao completa)\n"
-            "  • Modulo GIPAW 7.3.1\n"
-            "  • Atalho no menu de aplicativos\n\n"
-            "Tempo estimado: 40–60 minutos (maior parte na compilacao)."
+            "This installer will automatically configure:\n"
+            "  • System dependencies (via apt)\n"
+            "  • Quantum ESPRESSO 7.3.1  (full compilation)\n"
+            "  • GIPAW 7.3.1 module\n"
+            "  • Application menu shortcut\n\n"
+            "Estimated time: 40–60 minutes (mostly compilation)."
         )
         info.setStyleSheet("font-size: 12px; color: #333; padding: 4px 0;")
         root.addWidget(info)
@@ -176,15 +176,15 @@ class InstallerWindow(QDialog):
         root.addWidget(sep2)
 
         # --- Selecao de diretorio ---
-        dir_label = QLabel("Diretorio de instalacao:")
+        dir_label = QLabel("Installation directory:")
         dir_label.setStyleSheet("font-weight: bold;")
         root.addWidget(dir_label)
 
         dir_row = QHBoxLayout()
         self.dir_input = QLineEdit()
-        self.dir_input.setPlaceholderText("Clique em Procurar para escolher um diretorio...")
+        self.dir_input.setPlaceholderText("Click Browse to choose a directory...")
         self.dir_input.setMinimumHeight(32)
-        self.browse_btn = QPushButton("Procurar...")
+        self.browse_btn = QPushButton("Browse...")
         self.browse_btn.setMinimumHeight(32)
         self.browse_btn.clicked.connect(self._browse)
         dir_row.addWidget(self.dir_input, stretch=1)
@@ -192,7 +192,7 @@ class InstallerWindow(QDialog):
         root.addLayout(dir_row)
 
         # --- Status e progresso ---
-        self.status_label = QLabel("Aguardando selecao de diretorio.")
+        self.status_label = QLabel("Waiting for directory selection.")
         self.status_label.setStyleSheet("color: #555; font-style: italic;")
         root.addWidget(self.status_label)
 
@@ -203,7 +203,7 @@ class InstallerWindow(QDialog):
         root.addWidget(self.progress)
 
         # --- Log ---
-        log_label = QLabel("Log de instalacao:")
+        log_label = QLabel("Installation log:")
         log_label.setStyleSheet("font-weight: bold;")
         root.addWidget(log_label)
 
@@ -219,7 +219,7 @@ class InstallerWindow(QDialog):
         # --- Botao Instalar ---
         btn_row = QHBoxLayout()
         btn_row.addStretch()
-        self.install_btn = QPushButton("  Instalar  ")
+        self.install_btn = QPushButton("  Install  ")
         self.install_btn.setMinimumHeight(42)
         self.install_btn.setMinimumWidth(130)
         self.install_btn.setStyleSheet(
@@ -236,11 +236,11 @@ class InstallerWindow(QDialog):
 
     def _browse(self):
         d = QFileDialog.getExistingDirectory(
-            self, 'Selecione o diretorio de instalacao', os.path.expanduser('~')
+            self, 'Select installation directory', os.path.expanduser('~')
         )
         if d:
             self.dir_input.setText(d)
-            self.status_label.setText("Diretorio selecionado. Clique em Instalar para comecar.")
+            self.status_label.setText("Directory selected. Click Install to begin.")
 
     def _log(self, msg):
         self.log_box.append(msg)
@@ -249,18 +249,18 @@ class InstallerWindow(QDialog):
     def _start_install(self):
         chosen = self.dir_input.text().strip()
         if not chosen:
-            QMessageBox.warning(self, "Diretorio nao selecionado",
-                                "Por favor, escolha um diretorio antes de instalar.")
+            QMessageBox.warning(self, "No directory selected",
+                                "Please choose a directory before installing.")
             return
         if not os.path.isdir(chosen):
-            QMessageBox.warning(self, "Diretorio invalido",
-                                f"O diretorio nao existe:\n{chosen}")
+            QMessageBox.warning(self, "Invalid directory",
+                                f"The directory does not exist:\n{chosen}")
             return
 
         self.install_btn.setEnabled(False)
         self.browse_btn.setEnabled(False)
         self.progress.setVisible(True)
-        self._log(f"Iniciando instalacao em: {chosen}/spyn\n")
+        self._log(f"Starting installation in: {chosen}/spyn\n")
 
         self.thread = InstallThread(chosen, self.installer_dir)
         self.thread.log.connect(self._log)
@@ -274,24 +274,24 @@ class InstallerWindow(QDialog):
         self.browse_btn.setEnabled(True)
 
         if success:
-            self.status_label.setText("Instalacao concluida com sucesso!")
+            self.status_label.setText("Installation completed successfully!")
             QMessageBox.information(
-                self, "SPYN instalado",
-                "SPYN foi instalado com sucesso!\n\n"
-                "Voce pode iniciar o programa pelo menu de aplicativos\n"
-                "ou executando:\n\n"
+                self, "SPYN installed",
+                "SPYN was installed successfully!\n\n"
+                "You can start the program from the application menu\n"
+                "or by running:\n\n"
                 f"  cd {self.dir_input.text()}/spyn\n"
                 "  python3 spyn_main.py"
             )
         else:
-            self.status_label.setText("Instalacao falhou. Veja o log acima.")
+            self.status_label.setText("Installation failed. See the log above.")
             QMessageBox.critical(
-                self, "Erro na instalacao",
-                "A instalacao encontrou um erro.\n\n"
-                "Verifique o log nesta janela e os arquivos:\n"
+                self, "Installation error",
+                "The installation encountered an error.\n\n"
+                "Check the log in this window and the files:\n"
                 "  • compile_pw.log\n"
                 "  • compile_gipaw.log\n\n"
-                "dentro do diretorio qe/ da instalacao."
+                "inside the qe/ directory of the installation."
             )
 
 

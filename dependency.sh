@@ -1,9 +1,9 @@
 #!/bin/bash
-# Dependencias do sistema para SPYN + Quantum ESPRESSO 7.4.1 (Debian/Ubuntu/Mint)
+# System dependencies for SPYN + Quantum ESPRESSO 7.3.1 (Debian/Ubuntu/Mint)
 
 set -e
 
-echo "Instalando dependencias do sistema..."
+echo "Installing system dependencies..."
 sudo apt-get install -y \
     gawk \
     gfortran \
@@ -19,7 +19,7 @@ sudo apt-get install -y \
     python3-dev \
     python3-pip
 
-echo "Instalando dependencias Python..."
+echo "Installing Python dependencies..."
 pip3 install --break-system-packages PyQt5 matplotlib pandas scipy numpy 2>/dev/null || \
 pip3 install PyQt5 matplotlib pandas scipy numpy
 
