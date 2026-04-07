@@ -46,7 +46,36 @@ class InstallThread(QThread):
             spyn_dir = os.path.join(self.install_dir, 'spyn')
             archive  = os.path.join(self.installer_dir, 'spyn.tar.gz')
 
-            # 1 — extract files
+            # 1 — install system and Python dependencies
+            self.status.emit("Installing system dependencies...")
+            self.log.emit("→ Installing Debian packages (apt)...")
+            apt_packages = [
+                'gawk', 'gfortran', 'openmpi-bin', 'openmpi-doc',
+                'libopenmpi-dev', 'xterm', 'openbabel', 'jmol',
+                'python3-dev', 'python3-pip', 'python3-pyqt5',
+            ]
+            r = subprocess.run(
+                ['sudo', 'apt-get', 'install', '-y'] + apt_packages,
+                capture_output=True, text=True
+            )
+            if r.returncode != 0:
+                self.log.emit(f"[WARNING] apt-get returned code {r.returncode}: {r.stderr.strip()}")
+            else:
+                self.log.emit("   System dependencies installed.")
+
+            self.status.emit("Installing Python dependencies...")
+            self.log.emit("→ Installing Python packages (pip)...")
+            pip_packages = ['PyQt5', 'matplotlib', 'pandas', 'scipy', 'numpy']
+            r = subprocess.run(
+                ['pip3', 'install', '--upgrade'] + pip_packages,
+                capture_output=True, text=True
+            )
+            if r.returncode != 0:
+                self.log.emit(f"[WARNING] pip3 returned code {r.returncode}: {r.stderr.strip()}")
+            else:
+                self.log.emit("   Python dependencies installed.")
+
+            # 3 — extract files
             self.status.emit("Extracting SPYN files...")
             self.log.emit(f"→ Extracting {archive} to {self.install_dir}/")
             r = subprocess.run(
@@ -58,7 +87,7 @@ class InstallThread(QThread):
                 self.done.emit(False)
                 return
 
-            # 2 — write path configuration (spyndir.py)
+            # 4 — write path configuration (spyndir.py)
             self.status.emit("Configuring installation paths...")
             self.log.emit(f"→ Creating spyndir.py in {spyn_dir}/")
             with open(os.path.join(spyn_dir, 'spyndir.py'), 'w') as f:
@@ -68,12 +97,12 @@ class InstallThread(QThread):
                     f"       self.spyndir = '{spyn_dir}'\n"
                 )
 
-            # 3 — create launcher script (spyn.sh)
+            # 5 — create launcher script (spyn.sh)
             launcher = os.path.join(spyn_dir, 'spyn.sh')
             with open(launcher, 'w') as f:
                 f.write(f"#!/bin/bash\ncd '{spyn_dir}' && python3 spyn_main.py\n")
 
-            # 4 — open terminal and compile QE + GIPAW
+            # 6 — open terminal and compile QE + GIPAW
             self.status.emit("Compiling Quantum ESPRESSO 7.3.1 + GIPAW 7.3.1...")
             self.log.emit("→ Opening terminal for compilation (30–60 min)...")
             self.log.emit("   Follow the progress in the terminal window.")
@@ -84,7 +113,7 @@ class InstallThread(QThread):
                 shell=True
             )
 
-            # 5 — application menu entry
+            # 7 — application menu entry
             self.status.emit("Creating application menu entry...")
             self.log.emit("→ Creating spyn.desktop and permissions...")
             desktop_entry = (
