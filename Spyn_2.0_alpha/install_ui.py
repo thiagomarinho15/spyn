@@ -11,12 +11,21 @@ import subprocess
 import sys
 import os
 
-# Bootstrap: garante que xterm e PyQt5 estejam disponiveis antes do import
-subprocess.run(['sudo', 'apt', 'install', '-y', 'xterm'], capture_output=True)
-subprocess.run(
-    ['sudo', 'apt-get', 'install', '-y', 'python3-pip', 'python3-dev', 'python3-pyqt5'],
-    capture_output=True
+# Bootstrap: ensure system packages are available before importing PyQt5
+_bootstrap_pkgs = ['xterm', 'python3-pip', 'python3-dev', 'python3-pyqt5']
+print("[bootstrap] Running apt-get update...", flush=True)
+_r = subprocess.run(['sudo', 'apt-get', 'update', '-qq'], capture_output=False)
+if _r.returncode != 0:
+    print(f"[bootstrap] WARNING: apt-get update failed (code {_r.returncode})", flush=True)
+print(f"[bootstrap] Installing: {' '.join(_bootstrap_pkgs)}", flush=True)
+_r = subprocess.run(
+    ['sudo', 'apt-get', 'install', '-y'] + _bootstrap_pkgs,
+    capture_output=False
 )
+if _r.returncode != 0:
+    print(f"[bootstrap] ERROR: apt-get install failed (code {_r.returncode})", flush=True)
+    sys.exit(1)
+print("[bootstrap] Bootstrap packages OK.", flush=True)
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
@@ -47,6 +56,15 @@ class InstallThread(QThread):
             archive  = os.path.join(self.installer_dir, 'spyn.tar.gz')
 
             # 1 — install system and Python dependencies
+            self.status.emit("Updating package list...")
+            self.log.emit("→ Running apt-get update...")
+            r = subprocess.run(
+                ['sudo', 'apt-get', 'update', '-qq'],
+                capture_output=True, text=True
+            )
+            if r.returncode != 0:
+                self.log.emit(f"[WARNING] apt-get update failed (code {r.returncode}): {r.stderr.strip()}")
+
             self.status.emit("Installing system dependencies...")
             self.log.emit("→ Installing Debian packages (apt)...")
             apt_packages = [
@@ -59,15 +77,17 @@ class InstallThread(QThread):
                 capture_output=True, text=True
             )
             if r.returncode != 0:
-                self.log.emit(f"[WARNING] apt-get returned code {r.returncode}: {r.stderr.strip()}")
+                self.log.emit(f"[WARNING] apt-get install returned code {r.returncode}: {r.stderr.strip()}")
             else:
                 self.log.emit("   System dependencies installed.")
 
-            self.status.emit("Installing Python dependencies...")
+            self.status.emit("Installing Python dependencies (pip)...")
             self.log.emit("→ Installing Python packages (pip)...")
-            pip_packages = ['PyQt5', 'matplotlib', 'pandas', 'scipy', 'numpy']
+            # numpy>=2.0 is required for np.trapezoid; pip ensures the correct version
+            # since apt ships numpy 1.x on Debian 12.
+            pip_packages = ['numpy>=2.0', 'matplotlib', 'pandas', 'scipy']
             r = subprocess.run(
-                ['pip3', 'install', '--upgrade'] + pip_packages,
+                ['pip3', 'install', '--break-system-packages'] + pip_packages,
                 capture_output=True, text=True
             )
             if r.returncode != 0:
