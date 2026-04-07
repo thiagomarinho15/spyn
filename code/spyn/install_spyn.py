@@ -25,6 +25,20 @@ qe_dir  = f"{pwd}/qe"
 
 os.makedirs(qe_dir, exist_ok=True)
 
+# Fix Windows line endings (CRLF→LF) in all shell scripts
+for sh in ['dependency.sh', 'simbolic.sh',
+           'scripts/convert_kauto.sh', 'scripts/convert_kmanu.sh',
+           'scripts/conformer_order.sh', 'scripts/scraping.sh']:
+    path = os.path.join(pwd, sh)
+    if os.path.exists(path):
+        with open(path, 'rb') as f:
+            content = f.read()
+        fixed = content.replace(b'\r\n', b'\n')
+        if fixed != content:
+            with open(path, 'wb') as f:
+                f.write(fixed)
+            print(f"[fix] Converted CRLF→LF: {sh}")
+
 print("=" * 60)
 print("  SPYN — Quantum ESPRESSO 7.3.1 + GIPAW 7.3.1")
 print("=" * 60)

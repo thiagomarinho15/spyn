@@ -1,0 +1,9 @@
+# Always use LF for shell scripts and Python files (Linux target)
+*.sh    text eol=lf
+*.py    text eol=lf
+*.ui    text eol=lf
+*.md    text eol=lf
+*.txt   text eol=lf
+*.csv   text eol=lf
+*.cif   text eol=lf
+*.UPF   text eol=lf
