@@ -95,11 +95,11 @@ class InstallThread(QThread):
             # since apt ships numpy 1.x on Debian 12.
             pip_packages = ['numpy>=2.0', 'matplotlib', 'pandas', 'scipy']
             r = subprocess.run(
-                ['pip3', 'install', '--break-system-packages'] + pip_packages,
+                [sys.executable, '-m', 'pip', 'install', '--break-system-packages'] + pip_packages,
                 capture_output=True, text=True
             )
             if r.returncode != 0:
-                self.log.emit(f"[WARNING] pip3 returned code {r.returncode}: {r.stderr.strip()}")
+                self.log.emit(f"[WARNING] pip returned code {r.returncode}: {r.stderr.strip()}")
             else:
                 self.log.emit("   Python dependencies installed.")
 
