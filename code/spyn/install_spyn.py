@@ -56,8 +56,14 @@ run(
     "FC='gfortran' CC='gcc' F77='gfortran' MPIF90='mpif90'",
     "Step 2/5 — Configuring Quantum ESPRESSO (with MPI support)..."
 )
-# Limit parallelism to 4 to avoid race conditions on .mod files
-nproc_qe = max(1, min(int(nproc), 4))
+# Step 1: compile base Fortran modules sequentially to avoid race conditions
+# on .mod files (kinds.mod, constants.mod, etc.) that all other files depend on.
+run(
+    f"make -j1 -C '{qe_src}' modules 2>&1 | tee '{qe_dir}/compile_modules.log'",
+    "Step 2/5 — Compiling base modules (sequential, avoids kinds.mod race condition)..."
+)
+# Step 2: compile pw.x with limited parallelism (max 2 to avoid memory issues on VMs)
+nproc_qe = max(1, min(int(nproc), 2))
 run(
     f"make -j{nproc_qe} pw -C '{qe_src}' 2>&1 | tee '{qe_dir}/compile_pw.log'",
     f"Step 2/5 — Compiling pw.x with {nproc_qe} cores (20-40 min)..."
