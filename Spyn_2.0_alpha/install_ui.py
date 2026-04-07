@@ -12,7 +12,7 @@ import sys
 import os
 
 # Bootstrap: ensure system packages are available before importing PyQt5
-_bootstrap_pkgs = ['xterm', 'python3-pip', 'python3-dev', 'python3-pyqt5']
+_bootstrap_pkgs = ['xterm', 'python3-pip', 'python3-dev', 'python3-pyqt5', 'python3-pyqt5.qtsvg']
 print("[bootstrap] Repairing dpkg state (if needed)...", flush=True)
 subprocess.run(['sudo', 'dpkg', '--configure', '-a'], capture_output=False)
 print("[bootstrap] Running apt-get update...", flush=True)
@@ -78,6 +78,7 @@ class InstallThread(QThread):
                 'gawk', 'gfortran', 'openmpi-bin', 'openmpi-doc',
                 'libopenmpi-dev', 'xterm', 'openbabel', 'jmol',
                 'python3-dev', 'python3-pip', 'python3-pyqt5',
+                'python3-pyqt5.qtsvg',
             ]
             r = subprocess.run(
                 ['sudo', 'apt-get', 'install', '-y'] + apt_packages,
