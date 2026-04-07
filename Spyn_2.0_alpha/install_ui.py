@@ -13,6 +13,8 @@ import os
 
 # Bootstrap: ensure system packages are available before importing PyQt5
 _bootstrap_pkgs = ['xterm', 'python3-pip', 'python3-dev', 'python3-pyqt5']
+print("[bootstrap] Repairing dpkg state (if needed)...", flush=True)
+subprocess.run(['sudo', 'dpkg', '--configure', '-a'], capture_output=False)
 print("[bootstrap] Running apt-get update...", flush=True)
 _r = subprocess.run(['sudo', 'apt-get', 'update', '-qq'], capture_output=False)
 if _r.returncode != 0:
@@ -56,6 +58,11 @@ class InstallThread(QThread):
             archive  = os.path.join(self.installer_dir, 'spyn.tar.gz')
 
             # 1 — install system and Python dependencies
+            self.status.emit("Repairing dpkg state...")
+            self.log.emit("→ Running dpkg --configure -a (safe no-op if not needed)...")
+            subprocess.run(['sudo', 'dpkg', '--configure', '-a'],
+                           capture_output=True, text=True)
+
             self.status.emit("Updating package list...")
             self.log.emit("→ Running apt-get update...")
             r = subprocess.run(
