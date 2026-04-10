@@ -46,3 +46,6 @@ code/spyn/input_tmp.in
 # OS
 .DS_Store
 Thumbs.db
+
+# Pasta de imagens de erro (nunca subir)
+erros/
