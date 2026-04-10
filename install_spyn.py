@@ -56,11 +56,12 @@ run(
     "FC='gfortran' CC='gcc' F77='gfortran' MPIF90='mpif90'",
     "Step 2/5 — Configuring Quantum ESPRESSO (with MPI support)..."
 )
-# Limit parallelism to 4 to avoid race conditions on .mod files
-nproc_qe = max(1, min(int(nproc), 4))
+# Use -j1 to guarantee all .mod files (kinds.mod, constants.mod, etc.) are
+# generated sequentially before GIPAW tries to use them. Parallel make with
+# multiple cores causes race conditions on .mod file writes in QE 7.3.1.
 run(
-    f"make -j{nproc_qe} pw -C '{qe_src}' 2>&1 | tee '{qe_dir}/compile_pw.log'",
-    f"Step 2/5 — Compiling pw.x with {nproc_qe} cores (20-40 min)..."
+    f"make -j1 pw -C '{qe_src}' 2>&1 | tee '{qe_dir}/compile_pw.log'",
+    "Step 2/5 — Compiling pw.x with 1 core (avoids .mod race conditions, ~60 min)..."
 )
 
 # Passo 3 — baixar e compilar GIPAW 7.3.1
