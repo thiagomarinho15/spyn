@@ -69,68 +69,22 @@ class allPlots(Dirs):
 
             elif cbox_method == 'Lorentzian':
                 xaray = np.arange(xmin, xmax, 0.001)
-                md = []
-                cnt = 0
-                cnt2 = 0
-                y = []
                 if referencia == 'None':
-                    x0 = [ppm for ppm in ppm_x]
+                    x0 = ppm_x[:]
                 else:
-                    x0 = [abs(ppm-referencia) for ppm in ppm_x]
+                    x0 = [abs(ppm - referencia) for ppm in ppm_x]
                 x0.sort()
-                if len(x0) == 1: #list with 1 ppm
-                    for xx in xaray:
-                        y.append((A * (width ** 2)) / (width ** 2 + (4 * (x0[0] - xx) ** 2)))
-
-                    self.apy_ui.MplWidget.canvas.axes.clear()
-                    self.apy_ui.MplWidget.canvas.axes.plot(xaray, y)
-                    self.apy_ui.MplWidget.canvas.axes.set_ylim([ymin, ymax])
-                    self.apy_ui.MplWidget.canvas.axes.set_xlim([xmax, xmin])
-                    self.apy_ui.MplWidget.canvas.axes.set_xlabel('ppm')
-                    self.apy_ui.MplWidget.canvas.draw()
-
-                elif len(x0) == 2: #list with 2 PPM
-                    md.append(round((x0[0] + x0[1]) / 2, 2))  #calculus of media, in this case exist just 1 value
-                    for xx in xaray:
-                        y.append((A * (width ** 2)) / (
-                                    width ** 2 + (4 * (round(x0[cnt], 3) - round(xx, 3)) ** 2)))  # faço a conta
-
-                        if round(xx, 2) == md[0]:  # When x to arrive in median, up counter
-                            cnt += 1
-                            if cnt > 1:  # como a lista de x0 só tem 2 elementos, o contador nao pode passar de 1
-                                cnt = 1  # entao eu mantenho ele sempre em 1
-
-                    yhat = savgo(y, 51, suav)
-                    self.apy_ui.MplWidget.canvas.axes.clear()
-                    self.apy_ui.MplWidget.canvas.axes.plot(xaray, yhat)
-                    self.apy_ui.MplWidget.canvas.axes.set_ylim([ymin, ymax])
-                    self.apy_ui.MplWidget.canvas.axes.set_xlim([xmax, xmin])
-                    self.apy_ui.MplWidget.canvas.axes.set_xlabel('ppm')
-                    self.apy_ui.MplWidget.canvas.draw()
-
-                else: #AQUI É PRA LISTA MAIOR Q 2 PPM
-                    for tensor in range(len(x0)):
-                        if tensor == len(x0) - 1:
-                            break
-                        else:
-                            md.append(round((x0[tensor] + x0[tensor + 1]) / 2, 2))
-
-                    for xx in xaray:  # percorro cada item do vetor
-                        y.append((A * (width**2)) / (width**2 + (4*(round(x0[cnt], 3) - round(xx, 3))**2)))
-                        if round(xx, 2) == md[cnt2]:  # qnd o x chegar na média sobe os 2 contadores (contador da lista média e da lista x0)
-                            cnt2 += 1
-                            cnt += 1
-                            if cnt2 > len(md) - 1:  # se o contador da média for maior que a lista da média eu zero ele
-                                cnt2 = 0
-
-                    yhat = savgo(y, 51, suav)
-
-                    self.apy_ui.MplWidget.canvas.axes.clear()
-                    self.apy_ui.MplWidget.canvas.axes.plot(xaray, yhat)
-                    self.apy_ui.MplWidget.canvas.axes.set_ylim([ymin, ymax])
-                    self.apy_ui.MplWidget.canvas.axes.set_xlim([xmax, xmin])
-                    self.apy_ui.MplWidget.canvas.axes.set_xlabel('ppm')
-                    self.apy_ui.MplWidget.canvas.draw()
+                y = np.zeros(len(xaray))
+                for peak in x0:
+                    y += (A * width**2) / (width**2 + 4 * (xaray - peak)**2)
+                if len(x0) > 1:
+                    y = savgo(y, 51, suav)
+                self.apy_ui.MplWidget.canvas.axes.clear()
+                self.apy_ui.MplWidget.canvas.axes.plot(xaray, y)
+                self.apy_ui.MplWidget.canvas.axes.set_ylim([ymin, ymax])
+                self.apy_ui.MplWidget.canvas.axes.set_xlim([xmax, xmin])
+                self.apy_ui.MplWidget.canvas.axes.set_xlabel('ppm')
+                self.apy_ui.MplWidget.canvas.draw()
                     
         except FileNotFoundError:
             csGA_QMBox = QMessageBox()
@@ -148,79 +102,31 @@ class allPlots(Dirs):
             if cbox_method == 'Sticks':
                 self.apy_ui.MplWidget.canvas.axes.clear()
                 for tensors in x0:
-                    if referencia == 'None':                        
+                    if referencia == 'None':
                         self.apy_ui.MplWidget.canvas.axes.axvline(tensors,ymin=0, ymax=0.45)
                     else:
                         self.apy_ui.MplWidget.canvas.axes.axvline(abs(tensors - referencia), ymin=0, ymax=0.45)
                 self.apy_ui.MplWidget.canvas.axes.set_xlim([xmax,xmin])
                 self.apy_ui.MplWidget.canvas.axes.set_ylim([ymin,ymax])
                 self.apy_ui.MplWidget.canvas.draw()
-                
+
             elif cbox_method == 'Lorentzian':
                 xaray = np.arange(xmin, xmax, 0.001)
-                md = []
-                y = []
-                xx = []
-                cnt = 0
-                cnt2 = 0
                 if referencia == 'None':
-                    x0 = x0
+                    peaks = x0[:]
                 else:
-                    x0 = [abs(ppm - referencia) for ppm in x0]
-                x0.sort()
-                if len(x0) == 1:
-                    for x in xaray:
-                        y.append((A * (width ** 2)) / (width ** 2 + (4 * (x0[0] - x) ** 2)))
-
-                    self.apy_ui.MplWidget.canvas.axes.clear()
-                    self.apy_ui.MplWidget.canvas.axes.plot(xaray, y)
-                    self.apy_ui.MplWidget.canvas.axes.set_ylim([ymin, ymax])
-                    self.apy_ui.MplWidget.canvas.axes.set_xlim([xmax, xmin])
-                    self.apy_ui.MplWidget.canvas.axes.set_xlabel('ppm')
-                    self.apy_ui.MplWidget.canvas.draw()
-
-                elif len(x0) == 2:
-                    md.append(round((x0[0] + x0[1]) / 2, 2))  # calculo a média nesse caso só vai ter 1 valor
-                    for x in xaray:
-                        y.append(
-                            (A * (width ** 2)) / (width ** 2 + (4 * (round(x0[cnt], 3) - round(x, 3)) ** 2)))  # faço a conta
-
-                        if round(x, 2) == md[0]:  # qnd o x chegar na média, sobe o contador
-                            cnt += 1
-                            if cnt > 1:  # como a lista de x0 só tem 2 elementos, o contador nao pode passar de 1
-                                cnt = 1  # entao eu mantenho ele sempre em 1
-
-                    yhat = savgo(y, 51, suavization)
-                    self.apy_ui.MplWidget.canvas.axes.clear()
-                    self.apy_ui.MplWidget.canvas.axes.plot(xaray, yhat)
-                    self.apy_ui.MplWidget.canvas.axes.set_ylim([ymin, ymax])
-                    self.apy_ui.MplWidget.canvas.axes.set_xlim([xmax, xmin])
-                    self.apy_ui.MplWidget.canvas.axes.set_xlabel('ppm')
-                    self.apy_ui.MplWidget.canvas.draw()
-
-                else:
-                    for tensor in range(len(x0)):
-                        if tensor == len(x0) - 1:
-                            break
-                        else:
-                            md.append(round((x0[tensor] + x0[tensor + 1]) / 2, 2))
-
-                    for x in xaray:  # percorro cada item do vetor
-                        y.append((A * (width ** 2)) / (width ** 2 + (4 * (round(x0[cnt], 3) - round(x, 3)) ** 2)))  # faço o calculo
-                        xx.append(x)  # armazeno o x em uma lista (nao precisa disso)
-                        if round(x, 2) == md[cnt2]:  # qnd o x chegar na média sobe os 2 contadores (contador da lista média e da lista x0)
-                            cnt2 += 1
-                            cnt += 1
-                            if cnt2 > len(md) - 1:  # se o contador da média for maior que a lista da média eu zero ele
-                                cnt2 = 0
-
-                    yhat = savgo(y, 51, suavization)
-                    #self.apy_ui.MplWidget.canvas.axes.clear()
-                    self.apy_ui.MplWidget.canvas.axes.plot(xaray, yhat)
-                    self.apy_ui.MplWidget.canvas.axes.set_ylim([ymin, ymax])
-                    self.apy_ui.MplWidget.canvas.axes.set_xlim([xmax, xmin])
-                    self.apy_ui.MplWidget.canvas.axes.set_xlabel('ppm')
-                    self.apy_ui.MplWidget.canvas.draw()
+                    peaks = [abs(p - referencia) for p in x0]
+                peaks.sort()
+                y = np.zeros(len(xaray))
+                for peak in peaks:
+                    y += (A * width**2) / (width**2 + 4 * (xaray - peak)**2)
+                if len(peaks) > 1:
+                    y = savgo(y, 51, suavization)
+                self.apy_ui.MplWidget.canvas.axes.plot(xaray, y)
+                self.apy_ui.MplWidget.canvas.axes.set_ylim([ymin, ymax])
+                self.apy_ui.MplWidget.canvas.axes.set_xlim([xmax, xmin])
+                self.apy_ui.MplWidget.canvas.axes.set_xlabel('ppm')
+                self.apy_ui.MplWidget.canvas.draw()
         except TypeError:
             pass
         except IndexError:
@@ -266,72 +172,24 @@ class allPlots(Dirs):
                     self.apy_ui.MplWidget.canvas.axes.set_xlim([xmax,xmin])
                     self.apy_ui.MplWidget.canvas.axes.set_ylim([ymin,ymax])
                     self.apy_ui.MplWidget.canvas.draw()
-                ###
                 else:
                     xaray = np.arange(xmin, xmax, 0.001)
-                    md = []
-                    cnt = 0
-                    cnt2 = 0
-                    y = []
                     if referencia == 'None':
-                        x0 = [ppm for ppm in ppm_x]
+                        x0 = ppm_x[:]
                     else:
-                        x0 = [abs(ppm - referencia) for ppm in ppm_x]
+                        x0 = [abs(p - referencia) for p in ppm_x]
                     x0.sort()
-                    if len(x0) == 1: #LISTA COM 1 PPM
-                        for xx in xaray:
-                            y.append((A * (width ** 2)) / (width ** 2 + (4 * (x0[0] - xx) ** 2)))
-
-                        self.apy_ui.MplWidget.canvas.axes.clear()
-                        self.apy_ui.MplWidget.canvas.axes.plot(xaray, y)
-                        self.apy_ui.MplWidget.canvas.axes.set_ylim([ymin, ymax])
-                        self.apy_ui.MplWidget.canvas.axes.set_xlim([xmax, xmin])
-                        self.apy_ui.MplWidget.canvas.axes.set_xlabel('ppm')
-                        self.apy_ui.MplWidget.canvas.draw()
-
-                    elif len(x0) == 2: #LISTA COM 2 PPM
-                        md.append(round((x0[0] + x0[1]) / 2, 2))  # calculo a média nesse caso só vai ter 1 valor
-                        for xx in xaray:
-                            y.append((A * (width ** 2)) / (
-                                        width ** 2 + (4 * (round(x0[cnt], 3) - round(xx, 3)) ** 2)))  # faço a conta
-
-                            if round(xx, 2) == md[0]:  # qnd o x chegar na média, sobe o contador
-                                cnt += 1
-                                if cnt > 1:  # como a lista de x0 só tem 2 elementos, o contador nao pode passar de 1
-                                    cnt = 1  # entao eu mantenho ele sempre em 1
-
-                        yhat = savgo(y, 51, suav)
-                        self.apy_ui.MplWidget.canvas.axes.clear()
-                        self.apy_ui.MplWidget.canvas.axes.plot(xaray, yhat)
-                        self.apy_ui.MplWidget.canvas.axes.set_ylim([ymin, ymax])
-                        self.apy_ui.MplWidget.canvas.axes.set_xlim([xmax, xmin])
-                        self.apy_ui.MplWidget.canvas.axes.set_xlabel('ppm')
-                        self.apy_ui.MplWidget.canvas.draw()
-
-                    else: #AQUI É PRA LISTA MAIOR Q 2 PPM
-                        for tensor in range(len(x0)):
-                            if tensor == len(x0) - 1:
-                                break
-                            else:
-                                md.append(round((x0[tensor] + x0[tensor + 1]) / 2, 2))
-
-                        for xx in xaray:  # percorro cada item do vetor
-                            y.append((A * (width**2)) / (width**2 + (4*(round(x0[cnt], 3) - round(xx, 3))**2)))
-                            if round(xx, 2) == md[cnt2]:  # qnd o x chegar na média sobe os 2 contadores (contador da lista média e da lista x0)
-                                cnt2 += 1
-                                cnt += 1
-                                if cnt2 > len(md) - 1:  # se o contador da média for maior que a lista da média eu zero ele
-                                    cnt2 = 0
-
-                        yhat = savgo(y, 51, suav)
-
-                        self.apy_ui.MplWidget.canvas.axes.clear()
-                        self.apy_ui.MplWidget.canvas.axes.plot(xaray, yhat)
-                        self.apy_ui.MplWidget.canvas.axes.set_ylim([ymin, ymax])
-                        self.apy_ui.MplWidget.canvas.axes.set_xlim([xmax, xmin])
-                        self.apy_ui.MplWidget.canvas.axes.set_xlabel('ppm')
-                        self.apy_ui.MplWidget.canvas.draw()
-                    ####
+                    y = np.zeros(len(xaray))
+                    for peak in x0:
+                        y += (A * width**2) / (width**2 + 4 * (xaray - peak)**2)
+                    if len(x0) > 1:
+                        y = savgo(y, 51, suav)
+                    self.apy_ui.MplWidget.canvas.axes.clear()
+                    self.apy_ui.MplWidget.canvas.axes.plot(xaray, y)
+                    self.apy_ui.MplWidget.canvas.axes.set_ylim([ymin, ymax])
+                    self.apy_ui.MplWidget.canvas.axes.set_xlim([xmax, xmin])
+                    self.apy_ui.MplWidget.canvas.axes.set_xlabel('ppm')
+                    self.apy_ui.MplWidget.canvas.draw()
 
             except ValueError:
                 csGA_QMBox = QMessageBox()
