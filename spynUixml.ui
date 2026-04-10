@@ -2137,7 +2137,7 @@ color: rgb(0, 0, 0);</string>
                 <item row="1" column="2">
                  <widget class="QLineEdit" name="ln_xmax">
                   <property name="text">
-                   <string>10</string>
+                   <string>220</string>
                   </property>
                  </widget>
                 </item>
