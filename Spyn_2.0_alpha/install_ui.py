@@ -10,6 +10,18 @@ Usage:
 import subprocess
 import sys
 import os
+import importlib.util
+
+# Check if PyQt5 is already available before the bootstrap runs.
+# If it is missing, we will need to restart the process after installing it
+# so that the new process inherits a clean environment with Qt properly loaded.
+def _pyqt5_available():
+    try:
+        return importlib.util.find_spec('PyQt5') is not None
+    except Exception:
+        return False
+
+_pyqt5_was_missing = not _pyqt5_available()
 
 # Bootstrap: ensure system packages are available before importing PyQt5
 _bootstrap_pkgs = ['xterm', 'python3-pip', 'python3-dev', 'python3-pyqt5', 'python3-pyqt5.qtsvg']
@@ -28,6 +40,14 @@ if _r.returncode != 0:
     print(f"[bootstrap] ERROR: apt-get install failed (code {_r.returncode})", flush=True)
     sys.exit(1)
 print("[bootstrap] Bootstrap packages OK.", flush=True)
+
+# If PyQt5 was just installed in this run, restart the script so the new
+# process starts with Qt libraries properly available in a clean environment.
+# This avoids the "could not connect to display / xcb plugin" crash that
+# occurs when Qt is loaded for the first time inside an already-running process.
+if _pyqt5_was_missing:
+    print("[bootstrap] PyQt5 was just installed — restarting installer...", flush=True)
+    os.execv(sys.executable, [sys.executable] + sys.argv)
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
